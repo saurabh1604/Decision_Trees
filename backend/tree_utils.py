@@ -19,6 +19,15 @@ def tree_to_json(clf, feature_names=None):
         n_samples = int(tree_.n_node_samples[node])
         # value is shape (n_nodes, 1, n_classes) for classifier, (n_nodes, 1, 1) for regressor
         value = tree_.value[node][0]
+
+        # FIX: Check if value is normalized (sum ~ 1.0) and convert to counts if it's classification
+        if len(value) > 1 and n_samples > 1:
+            val_sum = np.sum(value)
+            # If value sums to ~1.0 but samples >> 1, it's normalized probabilities
+            if abs(val_sum - 1.0) < 1e-4 and abs(val_sum - n_samples) > 0.1:
+                # Scale back to counts
+                value = value * n_samples
+
         value_list = value.tolist()
 
         # Calculate step-by-step math details
@@ -43,6 +52,7 @@ def tree_to_json(clf, feature_names=None):
             math_details["probs"] = probs
             # Estimate counts based on n_samples (since value might be normalized)
             # Rounding to nearest integer for display clarity if close
+            # Note: value is now already counts if we fixed it above, but safe to recalc
             counts = (probs_array * n_samples).tolist()
             math_details["class_counts"] = counts
 
@@ -58,16 +68,12 @@ def tree_to_json(clf, feature_names=None):
                 math_details["terms"] = terms
                 math_details["formula"] = "-sum(p * log2(p))"
         else: # Regression
-            # Value is mean (or sum, but usually mean in predict)
-            # Actually tree_.value for regression is the sum of targets in the node?
-            # No, for DecisionTreeRegressor, it's the mean * n_samples (sum) if it's weighted?
-            # Let's check sklearn docs or experiment.
-            # Usually tree_.value[node] contains the stored value. For standard MSE, it is the mean.
-            # Wait, let's verify.
-            # In sklearn implementation, for MSE, value stored is indeed the mean prediction for the node.
             pass
 
-        # Check if leaf
+        # Check if split (not leaf)
+        # Verify if impurity is effectively 0
+        is_pure = impurity < 1e-7
+
         if tree_.feature[node] != _tree.TREE_UNDEFINED:
             feature_idx = int(tree_.feature[node])
             name = feature_names[feature_idx]

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator, Activity, PieChart, BarChart2, TrendingUp, ArrowDown } from 'lucide-react';
+import { Calculator, Activity, PieChart, BarChart2, TrendingUp, ArrowDown, AlertCircle } from 'lucide-react';
 
 const StepByStepMath = ({ selectedNode }) => {
     // If no node selected, show placeholder
@@ -30,6 +30,9 @@ const StepByStepMath = ({ selectedNode }) => {
     const isRegression = value && value.length === 1; // Or check task type from props if available
 
     const fmt = (n) => typeof n === 'number' ? n.toFixed(3) : n;
+
+    // Check for Pure Node
+    const isPure = impurity < 0.0001;
 
     // Classification Stats
     const totalSamples = samples || 1;
@@ -139,8 +142,9 @@ const StepByStepMath = ({ selectedNode }) => {
                         )}
 
                         {isLeaf && (
-                            <div className="text-center text-sm text-slate-500 italic bg-white p-3 rounded border border-slate-100">
-                                This is a terminal node. No further splits.
+                            <div className="text-center text-sm text-slate-500 italic bg-white p-3 rounded border border-slate-100 flex items-center justify-center gap-2">
+                                {isPure && <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>}
+                                {isPure ? "This node is pure (Impurity 0)." : "This is a terminal node. No further splits."}
                             </div>
                         )}
                     </div>
@@ -216,7 +220,10 @@ const StepByStepMath = ({ selectedNode }) => {
                                         <p className="text-sm font-bold text-slate-700">Parent Impurity - Weighted Child Impurity</p>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-3xl font-black text-indigo-600 tracking-tight">{fmt(gain)}</span>
+                                        {/* Handle weird Gain > Impurity or Impurity=0 cases */}
+                                        <span className="text-3xl font-black text-indigo-600 tracking-tight">
+                                            {isPure ? "0.000" : fmt(gain)}
+                                        </span>
                                         <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-1">Improvement</p>
                                     </div>
                                 </div>
