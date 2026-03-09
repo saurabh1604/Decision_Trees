@@ -5,7 +5,7 @@ import TreeDiagram from './components/TreeDiagram';
 import StepByStepMath from './components/StepByStepMath';
 import { fetchDataset, trainTree, trainForest, trainBoosting } from './api';
 import * as d3 from 'd3';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 function App() {
     const [datasetType, setDatasetType] = useState('moons');
