@@ -92,7 +92,7 @@ const Sidebar = ({
                             { id: 'tree', icon: GitBranch, label: 'Tree' },
                             { id: 'forest', icon: Layers, label: 'Forest' },
                             { id: 'boosting', icon: Zap, label: 'Boost' }
-                        ].map(({ id, icon: Icon, label }) => (
+                        ].map(({ id, icon: IconComponent, label }) => (
                             <button
                                 key={id}
                                 onClick={() => setAlgoType(id)}
@@ -102,7 +102,7 @@ const Sidebar = ({
                                     : 'text-slate-500 hover:bg-slate-200/50 hover:text-slate-700'
                                 }`}
                             >
-                                <Icon className="w-4 h-4" />
+                                <IconComponent className="w-4 h-4" />
                                 {label}
                             </button>
                         ))}
